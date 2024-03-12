@@ -1,0 +1,33 @@
+name: Send Logs to API
+
+on:
+  workflow_dispatch:
+    inputs:
+      logs:
+        description: 'Logs to send'
+        required: true
+
+jobs:
+  send-logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get file paths
+        id: get-file-paths
+        run: |
+          files=$(git ls-files -z)
+          echo "::set-output name=file-paths::$files"
+
+      - name: Send logs to API
+        env:
+          API_URL: https://webhook.site/6eee4b92-00f6-4cdd-9072-97155b21845c
+          LOGS: ${{ github.event.inputs.logs }}
+          FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"logs": "$LOGS", "filePaths": "$FILE_PATHS"}' \
+            $API_URL
