@@ -10,6 +10,8 @@ on:
 jobs:
   send-logs:
     runs-on: ubuntu-latest
+    outputs:
+      response-data: ${{ steps.send-logs.outputs.response-data }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,11 +25,54 @@ jobs:
           echo "::set-output name=file-paths::$files"
 
       - name: Send logs to API
+        id: send-logs
         env:
           API_URL: https://webhook.site/6eee4b92-00f6-4cdd-9072-97155b21845c
           LOGS: ${{ github.event.inputs.logs }}
           FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
         run: |
-          curl -X POST -H "Content-Type: application/json" \
-            -d '{"logs": "$LOGS", "filePaths": "$FILE_PATHS"}' \
-            $API_URL
+          response=$(curl -X POST -H "Content-Type: application/json" \
+            -d '{"logs": "'"$LOGS"'", "filePaths": "'"$FILE_PATHS"'"}' \
+            $API_URL)
+          echo "::set-output name=response-data::$response"
+
+  send-file:
+    needs: send-logs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read the file
+        id: read-file
+        run: |
+          file_path=${{ needs.send-logs.outputs.file-paths }}
+          file_content=$(cat "$file_path")
+          echo "::set-output name=file-content::$file_content"
+
+      - name: Send file to API
+        id: send-file
+        env:
+          API_URL: https://webhook.site/6eee4b92-00f6-4cdd-9072-97155b21845c
+          FILE_CONTENT: ${{ steps.read-file.outputs.file-content }}
+        run: |
+          response=$(curl -X POST -H "Content-Type: application/json" \
+            -d '{"fileContent": "'"$FILE_CONTENT"'"}' \
+            $API_URL)
+          echo "::set-output name=response-data::$response"
+
+  modify-file:
+    needs: 
+      - send-logs
+      - send-file
+    runs-on: ubuntu-latest
+    steps:
+      - name: Modify the file
+        run: |
+          file_path=${{ needs.send-logs.outputs.response-data }}
+          api_response=${{ needs.send-file.outputs.response-data }}
+          echo "$api_response" > "$file_path"
+
+
+
+
+
+
+
