@@ -37,6 +37,7 @@ jobs:
           response=$(curl -X POST -H "Content-Type: application/json" \
             -d '{"error_message": "$LOGS", "available_files": "$FILE_PATHS"}' \
             $API_URL)
+          echo "$response"
           identifiedFiles=$(echo "$response" | jq -r '.data.identified_files')
           echo "::set-output name=identified-files::$identifiedFiles"
 
