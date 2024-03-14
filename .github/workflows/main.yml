@@ -54,9 +54,14 @@ jobs:
           echo "response: $response"
           correctedFiles=$(echo "$response" | jq -r '.corrected_files')
           echo "::set-output name=corrected-files::$correctedFiles"
-          
+
+      - name: Create new branch
+        run: git checkout -b fix-issue
+
       - name: Modify the file
         run: |
-          file_path=${{ steps.send-logs.outputs.identified-files }}
-          corrected_data=${{ steps.send-file.outputs.corrected-files }}
+          file_path="${{ steps.send-logs.outputs.identified-files }}"
+          corrected_data="${{ steps.send-file.outputs.corrected-files }}"
+          echo "file-path: $file_path"
+          echo "corrected_data: $corrected_data"
           echo "$corrected_data" > "$file_path"
