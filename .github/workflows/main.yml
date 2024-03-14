@@ -34,12 +34,10 @@ jobs:
           LOGS: ${{ github.event.inputs.logs }}
           FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
         run: |
-          str="{\"error_message\": \"$LOGS\", \"available_files\": \"$FILE_PATHS\"}"
-          echo "strrrrr:$str"
-          response=$(curl -X POST -H "Content-Type: application/json" \
-          -d "$str" \
-          $API_URL)
-          echo "HERE: $response"
+          payload=$(jq -n --arg logs "$LOGS" --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
+          echo "payload: $payload"
+          response=$(curl -X POST -H "Content-Type: application/json" -d "$payload" "$API_URL")
+          echo "Response: $response"
           identifiedFiles=$(echo "$response" | jq -r '.data.identified_files')
           echo "::set-output name=identified-files::$identifiedFiles"
 
