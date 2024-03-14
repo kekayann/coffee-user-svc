@@ -28,7 +28,7 @@ jobs:
       - name: Send logs to API
         id: send-logs
         env:
-          API_URL: https://fc05-111-118-199-2.ngrok-free.app/identify-files/
+          API_URL: https://c65e-112-135-210-45.ngrok-free.app/identify-files/
           LOGS: ${{ github.event.inputs.logs }}
           FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
         run: |
@@ -42,7 +42,7 @@ jobs:
       - name: Send file to API
         id: send-file
         env:
-          API_URL: https://fc05-111-118-199-2.ngrok-free.app/correct-errors/
+          API_URL: https://c65e-112-135-210-45.ngrok-free.app/correct-errors/
           FILE_NAME: ${{ steps.send-logs.outputs.identified-files }}
           FILE_PATH: ${{ steps.send-logs.outputs.identified-files }}
           LOGS: ${{ github.event.inputs.logs }}
