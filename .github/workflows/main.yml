@@ -48,7 +48,7 @@ jobs:
           LOGS: ${{ github.event.inputs.logs }}
         run: |
           file_content=$(cat "$FILE_PATH")
-          payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$decoded_content" --arg logs "$LOGS" '{"file_contents": {($fileName): $fileContent}, "error_message": $logs}')
+          payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$file_content" --arg logs "$LOGS" '{"file_contents": {($fileName): $fileContent}, "error_message": $logs}')
           echo "payload: $payload"
           response=$(curl -X POST -H 'accept: application/json' -H "Content-Type: application/json" -d "$payload" "$API_URL")
           echo "response: $response"
