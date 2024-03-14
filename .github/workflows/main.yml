@@ -43,7 +43,7 @@ jobs:
         id: read-file
         run: |
           file_path=${{ steps.send-logs.outputs.identified-files }}
-          file_content=$(cat "$file_path")
+          file_content=$(cat "$file_path" | base64)
           echo "::set-output name=file-content::$file_content"
 
       - name: Send file to API
@@ -54,7 +54,8 @@ jobs:
           FILE_CONTENT: ${{ steps.read-file.outputs.file-content }}
           LOGS: ${{ github.event.inputs.logs }}
         run: |
-          payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$FILE_CONTENT" --arg logs "$LOGS" '{"file_contents": {($fileName): $fileContent}, "error_message": $logs}')
+          decoded_content=$(echo "$FILE_CONTENT" | base64 -d)
+          payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$decoded_content" --arg logs "$LOGS" '{"file_contents": {($fileName): $fileContent}, "error_message": $logs}')
           echo "payload: $payload"
           response=$(curl -X POST -H 'accept: application/json' -H "Content-Type: application/json" -d "$payload" $API_URL)
           echo "response: $response"
