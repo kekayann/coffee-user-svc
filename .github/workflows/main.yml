@@ -53,7 +53,7 @@ jobs:
         run: |
           file_path=${{ needs.send-logs.outputs.identified-files }}
           pwd
-          dir
+          echo hi:$(dir)
           file_content=$(cat "$file_path")
           echo "::set-output name=file-content::$file_content"
 
