@@ -1,4 +1,4 @@
-name: Send Logs to API
+name: Correct error files using AI service
 
 on:
   workflow_dispatch:
@@ -8,14 +8,12 @@ on:
         required: true
 
 jobs:
-  send-logs:
+  send-logs-and-files:
     runs-on: ubuntu-latest
-    outputs:
-      identified-files: ${{ steps.send-logs.outputs.identified-files }}
     steps:
       - name: Install jq
         run: sudo apt-get install jq
-        
+
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
@@ -26,7 +24,7 @@ jobs:
         run: |
           files="$(git ls-files -z | tr '\0' ,)"
           echo "::set-output name=file-paths::$files"
-          
+
       - name: Send logs to API
         id: send-logs
         env:
@@ -42,18 +40,10 @@ jobs:
           echo "identifiedFiles: $identifiedFiles"
           echo "::set-output name=identified-files::$identifiedFiles"
 
-  send-file:
-    needs: send-logs
-    runs-on: ubuntu-latest
-    outputs:
-      corrected-files: ${{ steps.send-file.outputs.corrected-files }}
-    steps:
       - name: Read the file
         id: read-file
         run: |
-          file_path=${{ needs.send-logs.outputs.identified-files }}
-          pwd
-          echo hi:$(dir)
+          file_path=${{ steps.send-logs.outputs.identified-files }}
           file_content=$(cat "$file_path")
           echo "::set-output name=file-content::$file_content"
 
@@ -64,28 +54,15 @@ jobs:
           FILE_CONTENT: ${{ steps.read-file.outputs.file-content }}
         run: |
           response=$(curl -X POST -H "Content-Type: application/json" \
-            -d '{"file_contents": {}"'"$FILE_CONTENT"'"}' \
+            -d '{"file_contents": '"$FILE_CONTENT"'}' \
             $API_URL)
           echo "response: $response"
           correctedFiles=$(echo "$response" | jq -r '.corrected_files')
           echo "correctedFiles: $correctedFiles"
           echo "::set-output name=corrected-files::$correctedFiles"
 
-  modify-file:
-    needs: 
-      - send-logs
-      - send-file
-    runs-on: ubuntu-latest
-    steps:
       - name: Modify the file
         run: |
-          file_path=${{ needs.send-logs.outputs.identified-files }}
-          corrected-data=${{ needs.send-file.outputs.corrected-files }}
-          echo "$corrected-data" > "$file_path"
-
-
-
-
-
-
-
+          file_path=${{ steps.send-logs.outputs.identified-files }}
+          corrected_data=${{ steps.send-file.outputs.corrected-files }}
+          echo "$corrected_data" > "$file_path"
