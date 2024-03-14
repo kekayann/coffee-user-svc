@@ -38,7 +38,8 @@ jobs:
           echo "payload: $payload"
           response=$(curl -X POST -H 'accept: application/json' -H "Content-Type: application/json" -d "$payload" "$API_URL")
           echo "Response: $response"
-          identifiedFiles=$(echo "$response" | jq -r '.data.identified_files')
+          identifiedFiles=$(echo "$response" | jq -r '.identified_files')
+          echo "identifiedFiles: $identifiedFiles"
           echo "::set-output name=identified-files::$identifiedFiles"
 
   send-file:
@@ -63,8 +64,10 @@ jobs:
           response=$(curl -X POST -H "Content-Type: application/json" \
             -d '{"file_contents": {}"'"$FILE_CONTENT"'"}' \
             $API_URL)
-          correctedFiles=$(echo "$response" | jq -r '.data.corrected_files')
-          echo "::set-output name=corrected-files::$response.correctedFiles"
+          echo "response: $response"
+          correctedFiles=$(echo "$response" | jq -r '.corrected_files')
+          echo "correctedFiles: $correctedFiles"
+          echo "::set-output name=corrected-files::$correctedFiles"
 
   modify-file:
     needs: 
