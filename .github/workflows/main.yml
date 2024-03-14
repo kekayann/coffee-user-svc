@@ -82,5 +82,6 @@ jobs:
           title: "Fix Issue"
           body: |
             This pull request fixes the error contained in the logs.
+          destination_branch: "main"
           branch: "fix-issue"
           token: ${{ secrets.GITHUB_TOKEN }}
