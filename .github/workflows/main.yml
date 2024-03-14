@@ -58,16 +58,19 @@ jobs:
           echo "payload: $payload"
           response=$(curl -X POST -H 'accept: application/json' -H "Content-Type: application/json" -d "$payload" "$API_URL")
           echo "response: $response"
-          files=$(echo "$response" | jq -r '.corrected_files | to_entries | map("\(.key)=\(.value)") | .[]')
-
-          # Loop through each file and save its contents
-          for file in $files; do
-              file_path=$(echo "$file" | cut -d'=' -f1)
-              file_content=$(echo "$file" | cut -d'=' -f2)
-          
-              echo "Modifying file: $file_path"
-              echo "$file_content" > "$file_path"
+          correction_files=$(echo "${response}" | jq -r '.corrected_files')
+          # Loop through the JSON object
+          echo "${correction_files}" | jq -r 'to_entries[] | @base64' | while read -r line; do
+              # Decode the base64 to get the original JSON string
+              decoded=$(echo "${line}" | base64 --decode)
+              # Extract the key (filename) and value (file content) using jq
+              key=$(echo "${decoded}" | jq -r '.key')
+              value=$(echo "${decoded}" | jq -r '.value')
+              # Use the key as the filename and the value as the content, writing to the file
+              echo "${value}" > "${key}"
+              echo "Written to ${key}"
           done
+          echo "All files have been created."
 
       - name: Commit changes
         run: |
