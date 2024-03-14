@@ -79,9 +79,9 @@ jobs:
       - name: Create Pull Request
         uses: repo-sync/pull-request@v2
         with:
-          title: "Fix Issue"
-          body: |
-            This pull request fixes the error contained in the logs.
+          source_branch: "fix-issue-${{ github.run_id }}"
           destination_branch: "main"
-          branch: "fix-issue-${{ github.run_id }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "Fix Issue"
+          pr_body: |
+            This pull request fixes the error contained in the logs.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
