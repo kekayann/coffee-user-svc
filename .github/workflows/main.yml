@@ -8,7 +8,7 @@ on:
         required: true
 
 jobs:
-  send-logs-and-files:
+  send-logs-and-modify-file:
     runs-on: ubuntu-latest
     steps:
       - name: Install jq
