@@ -25,6 +25,8 @@ jobs:
         id: get-file-paths
         run: |
           files=$(git ls-files)
+          echo "::set-output name=file-paths::$files"
+          
       - name: Send logs to API
         id: send-logs
         env:
@@ -37,8 +39,6 @@ jobs:
           response=$(curl -X POST -H "Content-Type: application/json" \
           -d "$str" \
           $API_URL)
-
-          echo "HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
           echo "HERE: $response"
           identifiedFiles=$(echo "$response" | jq -r '.data.identified_files')
           echo "::set-output name=identified-files::$identifiedFiles"
