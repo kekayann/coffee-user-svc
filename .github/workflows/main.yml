@@ -47,7 +47,7 @@ jobs:
           FILE_PATH: ${{ steps.send-logs.outputs.identified-files }}
           LOGS: ${{ github.event.inputs.logs }}
         run: |
-          file_content=$(cat "$file_path")
+          file_content=$(cat "$FILE_PATH")
           echo "file content: $file_content"
           
       - name: Modify the file
