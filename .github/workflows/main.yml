@@ -28,16 +28,15 @@ jobs:
       - name: Send logs to API
         id: send-logs
         env:
-          API_URL: https://26ad-2402-4000-2200-f0d3-a926-cab1-f39f-a602.ngrok-free.app/identify-files/
+          API_URL: https://26ad-2402-4000-2200-f0d3-a926-cab1-f39f-a602.ngrok-free.app/identify-files
           LOGS: ${{ github.event.inputs.logs }}
           FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
         run: |
           payload=$(jq -n --arg logs "$LOGS" --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
           echo "payload: $payload"
-          response=$(curl -X POST -H 'accept: application/json' -H "Content-Type: application/json" -d "$payload" "$API_URL")
+          response=$(curl -X POST -H "Content-Type: application/json" -d "$payload" "$API_URL")
           echo "Response: $response"
           identifiedFiles=$(echo "$response" | jq -r '.identified_files')
-          echo "identifiedFiles: $identifiedFiles"
           echo "::set-output name=identified-files::$identifiedFiles"
 
       - name: Read the file
@@ -51,11 +50,13 @@ jobs:
         id: send-file
         env:
           API_URL: https://26ad-2402-4000-2200-f0d3-a926-cab1-f39f-a602.ngrok-free.app/correct-errors
+          FILE_NAME: ${{ steps.send-logs.outputs.identified-files }}
           FILE_CONTENT: ${{ steps.read-file.outputs.file-content }}
+          LOGS: ${{ github.event.inputs.logs }}
         run: |
-          response=$(curl -X POST -H "Content-Type: application/json" \
-            -d '{"file_contents": '"$FILE_CONTENT"'}' \
-            $API_URL)
+          payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$FILE_CONTENT" --arg logs "$LOGS" '{"file_contents": {$fileName: $fileContent}, "error_message": $logs}')
+          echo "payload: $payload"
+          response=$(curl -X POST -H "Content-Type: application/json" -d "$payload" $API_URL)
           echo "response: $response"
           correctedFiles=$(echo "$response" | jq -r '.corrected_files')
           echo "correctedFiles: $correctedFiles"
