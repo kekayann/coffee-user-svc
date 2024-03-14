@@ -52,6 +52,7 @@ jobs:
         id: read-file
         run: |
           file_path=${{ needs.send-logs.outputs.identified-files }}
+          pwd
           file_content=$(cat "$file_path")
           echo "::set-output name=file-content::$file_content"
 
