@@ -36,7 +36,7 @@ jobs:
         run: |
           payload=$(jq -n --arg logs "$LOGS" --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
           echo "payload: $payload"
-          response=$(curl -X POST -H "Content-Type: application/json" -d "$payload" "$API_URL")
+          response=$(curl -X POST -H 'accept: application/json' -H "Content-Type: application/json" -d "$payload" "$API_URL")
           echo "Response: $response"
           identifiedFiles=$(echo "$response" | jq -r '.data.identified_files')
           echo "::set-output name=identified-files::$identifiedFiles"
