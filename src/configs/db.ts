@@ -7,7 +7,7 @@ export const dataSource = new DataSource({
   port: configData.postgres.port,
   username: configData.postgres.username,
   password: configData.postgres.password,
-  database: configData.postgres.database,
+  database: "coffee-user-svcc",
   entities: ["src/entities/*.ts"], 
   synchronize: true,
 });
