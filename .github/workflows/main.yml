@@ -39,22 +39,15 @@ jobs:
           identifiedFiles=$(echo "$response" | jq -r '.identified_files')
           echo "::set-output name=identified-files::$identifiedFiles"
 
-      - name: Read the file
-        id: read-file
-        run: |
-          file_path=${{ steps.send-logs.outputs.identified-files }}
-          file_content=$(cat "$file_path")
-          echo "file content: $file_content"
-          echo "::set-output name=file-content::$file_content"
-
       - name: Send file to API
         id: send-file
         env:
           API_URL: https://26ad-2402-4000-2200-f0d3-a926-cab1-f39f-a602.ngrok-free.app/correct-errors/
           FILE_NAME: ${{ steps.send-logs.outputs.identified-files }}
+          FILE_PATH: ${{ steps.send-logs.outputs.identified-files }}
           LOGS: ${{ github.event.inputs.logs }}
         run: |
-          file_content="${{ steps.read-file.outputs.file-content }}"
+          file_content=$(cat "$file_path")
           echo "file content: $file_content"
           
       - name: Modify the file
