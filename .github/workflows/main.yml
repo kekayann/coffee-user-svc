@@ -34,7 +34,7 @@ jobs:
           LOGS: ${{ github.event.inputs.logs }}
           FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
         run: |
-          str="{\"error_message\": \"$LOGS\", \"available_files\": $FILE_PATHS}"
+          str="{\"error_message\": \"$LOGS\", \"available_files\": \"$FILE_PATHS\"}"
           echo "strrrrr:$str"
           response=$(curl -X POST -H "Content-Type: application/json" \
           -d "$str" \
