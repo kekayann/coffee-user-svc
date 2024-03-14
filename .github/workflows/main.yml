@@ -54,7 +54,7 @@ jobs:
           FILE_NAME: ${{ steps.send-logs.outputs.identified-files }}
           LOGS: ${{ github.event.inputs.logs }}
         run: |
-          file_content=${{ steps.read-file.outputs.file-content }}
+          file_content="${{ steps.read-file.outputs.file-content }}"
           echo "file content: $file_content"
           
       - name: Modify the file
