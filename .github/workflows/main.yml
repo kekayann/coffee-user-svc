@@ -6,6 +6,9 @@ on:
       logs:
         description: 'Logs to send'
         required: true
+env:
+  API_URL: https://f600-111-118-199-2.ngrok-free.app
+  LOGS: ${{ github.event.inputs.logs }}
 
 jobs:
   send-logs-and-modify-file:
@@ -28,8 +31,8 @@ jobs:
       - name: Send logs to API
         id: send-logs
         env:
-          API_URL: https://c65e-112-135-210-45.ngrok-free.app/identify-files/
-          LOGS: ${{ github.event.inputs.logs }}
+          API_URL: ${{env.API_URL}}/identify-files/
+          LOGS: ${{ env.LOGS }}
           FILE_PATHS: ${{ steps.get-file-paths.outputs.file-paths }}
         run: |
           payload=$(jq -n --arg logs "$LOGS" --arg file_paths "$FILE_PATHS" '{"error_message": $logs, "available_files": $file_paths}')
@@ -39,32 +42,32 @@ jobs:
           identifiedFiles=$(echo "$response" | jq -r '.identified_files')
           echo "::set-output name=identified-files::$identifiedFiles"
 
+      - name: Create new branch
+        run: git checkout -b fix-issue-${{ github.run_id }}
+
       - name: Send file to API
         id: send-file
         env:
-          API_URL: https://c65e-112-135-210-45.ngrok-free.app/correct-errors/
+          API_URL: ${{env.API_URL}}/correct-errors/
           FILE_NAME: ${{ steps.send-logs.outputs.identified-files }}
           FILE_PATH: ${{ steps.send-logs.outputs.identified-files }}
-          LOGS: ${{ github.event.inputs.logs }}
+          LOGS: ${{ env.LOGS }}
         run: |
           file_content=$(cat "$FILE_PATH")
           payload=$(jq -n --arg fileName "$FILE_NAME" --arg fileContent "$file_content" --arg logs "$LOGS" '{"file_contents": {($fileName): $fileContent}, "error_message": $logs}')
           echo "payload: $payload"
           response=$(curl -X POST -H 'accept: application/json' -H "Content-Type: application/json" -d "$payload" "$API_URL")
           echo "response: $response"
-          correctedFiles=$(echo "$response" | jq -r '.corrected_files')
-          echo "::set-output name=corrected-files::$correctedFiles"
+          files=$(echo "$response" | jq -r '.corrected_files | to_entries | map("\(.key)=\(.value)") | .[]')
 
-      - name: Create new branch
-        run: git checkout -b fix-issue-${{ github.run_id }}
-
-      - name: Modify the file
-        run: |
-          file_path="${{ steps.send-logs.outputs.identified-files }}"
-          corrected_data="${{ steps.send-file.outputs.corrected-files }}"
-          echo "file-path: $file_path"
-          echo "corrected_data: $corrected_data"
-          printf "%s" "$corrected_data" > "$file_path"
+          # Loop through each file and save its contents
+          for file in $files; do
+              file_path=$(echo "$file" | cut -d'=' -f1)
+              file_content=$(echo "$file" | cut -d'=' -f2)
+          
+              echo "Modifying file: $file_path"
+              echo "$file_content" > "$file_path"
+          done
 
       - name: Commit changes
         run: |
