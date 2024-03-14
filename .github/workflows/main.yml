@@ -87,7 +87,7 @@ jobs:
         with:
           source_branch: "fix-issue-${{ github.run_id }}"
           destination_branch: "main"
-          pr_title: "Fix Issue"
+          pr_title: "Fix Issue-${{ github.run_id }}"
           pr_body: |
             This pull request fixes the error contained in the logs.
           github_token: ${{ secrets.GITHUB_TOKEN }}
