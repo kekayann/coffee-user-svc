@@ -43,7 +43,7 @@ jobs:
         id: read-file
         run: |
           file_path=${{ steps.send-logs.outputs.identified-files }}
-          file_content=$(cat "$file_path" | base64)
+          file_content=$(cat "$file_path")
           echo "::set-output name=file-content::$file_content"
 
       - name: Send file to API
