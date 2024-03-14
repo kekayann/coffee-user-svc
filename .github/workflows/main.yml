@@ -25,6 +25,7 @@ jobs:
         id: get-file-paths
         run: |
           files=$(git ls-files -z)
+          IFS=$'\0' read -r -d '' -a file_paths <<<"$files"
           
       - name: Send logs to API
         id: send-logs
