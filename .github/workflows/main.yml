@@ -56,7 +56,7 @@ jobs:
           echo "::set-output name=corrected-files::$correctedFiles"
 
       - name: Create new branch
-        run: git checkout -b fix-issue
+        run: git checkout -b fix-issue-${{ github.run_id }}
 
       - name: Modify the file
         run: |
@@ -74,7 +74,7 @@ jobs:
           git commit -m "fix issue"
 
       - name: Push changes
-        run: git push origin fix-issue
+        run: git push origin fix-issue-${{ github.run_id }}
       
       - name: Create Pull Request
         uses: repo-sync/pull-request@v2
@@ -83,5 +83,5 @@ jobs:
           body: |
             This pull request fixes the error contained in the logs.
           destination_branch: "main"
-          branch: "fix-issue"
+          branch: "fix-issue-${{ github.run_id }}"
           token: ${{ secrets.GITHUB_TOKEN }}
