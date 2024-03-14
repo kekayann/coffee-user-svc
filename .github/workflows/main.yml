@@ -24,7 +24,7 @@ jobs:
       - name: Get file paths
         id: get-file-paths
         run: |
-          files=$(git ls-files)
+          files=$(git ls-files -z)
           echo "::set-output name=file-paths::$files"
           
       - name: Send logs to API
